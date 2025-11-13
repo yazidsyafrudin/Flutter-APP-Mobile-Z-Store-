@@ -1,0 +1,94 @@
+import 'package:flutter/material.dart';
+
+import '../../../components/custom_surfix_icon.dart';
+import '../../../components/form_error.dart';
+import '../../../components/no_account_text.dart';
+import '../../../constants.dart';
+
+class ForgotPassForm extends StatefulWidget {
+  const ForgotPassForm({super.key});
+
+  @override
+  _ForgotPassFormState createState() => _ForgotPassFormState();
+}
+
+class _ForgotPassFormState extends State<ForgotPassForm> {
+  final _formKey = GlobalKey<FormState>();
+  List<String> errors = [];
+  String? email;
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Email",
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            ),
+            const SizedBox(height: 8),
+          TextFormField(
+            keyboardType: TextInputType.emailAddress,
+            onSaved: (newValue) => email = newValue,
+            onChanged: (value) {
+              if (value.isNotEmpty && errors.contains(kEmailNullError)) {
+                setState(() {
+                  errors.remove(kEmailNullError);
+                });
+              } else if (emailValidatorRegExp.hasMatch(value) &&
+                  errors.contains(kInvalidEmailError)) {
+                setState(() {
+                  errors.remove(kInvalidEmailError);
+                });
+              }
+              return;
+            },
+            validator: (value) {
+              if (value!.isEmpty && !errors.contains(kEmailNullError)) {
+                setState(() {
+                  errors.add(kEmailNullError);
+                });
+              } else if (!emailValidatorRegExp.hasMatch(value) &&
+                  !errors.contains(kInvalidEmailError)) {
+                setState(() {
+                  errors.add(kInvalidEmailError);
+                });
+              }
+              return null;
+            },
+             decoration: InputDecoration(
+              hintText: "Masukan email anda",
+              prefixIcon: const Icon(Icons.email_outlined, color: Colors.blue),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Color(0xFFE0E0E0)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: Colors.blue),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          FormError(errors: errors),
+          const SizedBox(height: 8),
+          ElevatedButton(
+            onPressed: () {
+              if (_formKey.currentState!.validate()) {
+                // Do what you want to do
+              }
+            },
+            child: const Text("Continue"),
+          ),
+          const SizedBox(height: 30),
+          const NoAccountText(),
+        ],
+      ),
+    );
+  }
+}
