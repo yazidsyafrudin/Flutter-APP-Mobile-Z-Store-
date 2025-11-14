@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../models/Cart.dart';
+import '../../services/cart_service.dart';
 import 'components/cart_card.dart';
 import 'components/check_out_card.dart';
 
@@ -15,24 +17,47 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  late Future<List<Cart>> futureCarts; // ⬅️ Future untuk ambil cart
+  late Future<List<Cart>> futureCarts;
 
   @override
   void initState() {
     super.initState();
-    futureCarts = demoCarts(); // ⬅️ panggil fungsi Future dari Cart.dart
+    loadCart();
+  }
+
+  Future<void> loadCart() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt("user_id");
+
+    // 🔥 DEBUG — CEK apakah benar user_id tersimpan
+    print("======================================");
+    print(">>>> USER ID TERBACA DI CARTSCREEN = $userId");
+    print("======================================");
+
+    if (userId == null) {
+      // Jika tidak ada user_id → keranjang pasti kosong
+      setState(() {
+        futureCarts = Future.value([]);
+      });
+      return;
+    }
+
+    // 🔥 LOG — cek API dipanggil ke mana
+    print(">>>> MEMANGGIL API: get_cart.php?user_id=$userId");
+
+    setState(() {
+      futureCarts = CartService.getCart(userId);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          "Your Cart",
-          style: TextStyle(color: Color(0xFF000000)),
-        ),
+        title: const Text("Your Cart", style: TextStyle(color: Colors.black)),
         centerTitle: true,
       ),
+
       body: FutureBuilder<List<Cart>>(
         future: futureCarts,
         builder: (context, snapshot) {
@@ -40,34 +65,42 @@ class _CartScreenState extends State<CartScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          if (snapshot.hasError) {
-            return Center(child: Text("Error: ${snapshot.error}"));
+          // Jika tidak ada data
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text("Keranjang masih kosong"),
+            );
           }
 
-          final carts = snapshot.data ?? [];
-
-          if (carts.isEmpty) {
-            return const Center(child: Text("Keranjang kosong"));
-          }
+          final carts = snapshot.data!;
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: ListView.builder(
               itemCount: carts.length,
-              itemBuilder: (context, index) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Dismissible(
-                  key: Key(carts[index].product.id.toString()),
+              itemBuilder: (context, index) {
+                final cart = carts[index];
+
+                return Dismissible(
+                  key: Key(cart.cartId.toString()),
                   direction: DismissDirection.endToStart,
-                  onDismissed: (direction) {
-                    setState(() {
-                      carts.removeAt(index);
-                    });
+
+                  // DELETE ITEM
+                  onDismissed: (direction) async {
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    int? userId = prefs.getInt("user_id");
+
+                    if (userId != null) {
+                      await CartService.removeFromCart(userId, cart.productId);
+                      loadCart(); // Refresh list
+                    }
                   },
+
                   background: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFE6E6),
+                      color: Colors.red.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(15),
                     ),
                     child: Row(
@@ -77,14 +110,28 @@ class _CartScreenState extends State<CartScreen> {
                       ],
                     ),
                   ),
-                  child: CartCard(cart: carts[index]),
-                ),
-              ),
+
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: CartCard(cart: cart),
+                  ),
+                );
+              },
             ),
           );
         },
       ),
-      bottomNavigationBar: const CheckoutCard(),
+
+      bottomNavigationBar: FutureBuilder<List<Cart>>(
+        future: futureCarts,
+        builder: (context, snapshot) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const SizedBox.shrink();
+          }
+
+          return CheckoutCard(carts: snapshot.data!);
+        },
+      ),
     );
   }
 }
