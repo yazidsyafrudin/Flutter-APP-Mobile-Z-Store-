@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../components/form_error.dart';
 import '../../../constants.dart';
@@ -25,26 +26,23 @@ class _SignFormState extends State<SignForm> {
 
   void addError({String? error}) {
     if (!errors.contains(error)) {
-      setState(() {
-        errors.add(error);
-      });
+      setState(() => errors.add(error));
     }
   }
 
   void removeError({String? error}) {
     if (errors.contains(error)) {
-      setState(() {
-        errors.remove(error);
-      });
+      setState(() => errors.remove(error));
     }
   }
 
-  // 🔥 Fungsi untuk login ke backend PHP
+  // ================================
+  // 🔥 LOGIN USER & SIMPAN user_id
+  // ================================
   Future<void> loginUser() async {
     setState(() => isLoading = true);
 
     try {
-      // Ganti dengan IP kamu sendiri jika pakai device fisik
       var url = Uri.parse("http://localhost/Api_zstore/login.php");
 
       var response = await http.post(url, body: {
@@ -55,15 +53,20 @@ class _SignFormState extends State<SignForm> {
       var data = json.decode(response.body);
 
       if (data["success"] == true) {
+
+        // 🔥 Simpan user_id
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setInt("user_id", data["user"]["id"]);
+        prefs.setString("email", data["user"]["email"]);
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login berhasil!")),
         );
 
-        // Navigasi ke halaman berikut
         Navigator.pushNamed(context, LoginSuccessScreen.routeName);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Login gagal: ${data["message"] ?? 'Cek kembali email/password'}")),
+          SnackBar(content: Text("Login gagal: ${data["message"]}")),
         );
       }
     } catch (e) {
@@ -82,27 +85,20 @@ class _SignFormState extends State<SignForm> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            "Email",
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-          ),
+          const Text("Email",
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
           const SizedBox(height: 8),
+
+          // EMAIL FIELD
           TextFormField(
             keyboardType: TextInputType.emailAddress,
             onSaved: (newValue) => email = newValue,
             onChanged: (value) {
-              if (value.isNotEmpty) {
-                removeError(error: kEmailNullError);
-              } else if (emailValidatorRegExp.hasMatch(value)) {
-                removeError(error: kInvalidEmailError);
-              }
+              if (value.isNotEmpty) removeError(error: kEmailNullError);
             },
             validator: (value) {
               if (value!.isEmpty) {
                 addError(error: kEmailNullError);
-                return "";
-              } else if (!emailValidatorRegExp.hasMatch(value)) {
-                addError(error: kInvalidEmailError);
                 return "";
               }
               return null;
@@ -112,26 +108,21 @@ class _SignFormState extends State<SignForm> {
               prefixIcon: const Icon(Icons.email_outlined, color: Colors.blue),
               filled: true,
               fillColor: Colors.white,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             ),
           ),
           const SizedBox(height: 20),
 
-          const Text(
-            "Password",
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-          ),
+          const Text("Password",
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
           const SizedBox(height: 8),
+
+          // PASSWORD FIELD
           TextFormField(
             obscureText: true,
             onSaved: (newValue) => password = newValue,
-            onChanged: (value) {
-              password = value;
-            },
+            onChanged: (value) => password = value,
             validator: (value) {
               if (value!.isEmpty) {
                 addError(error: kPassNullError);
@@ -147,31 +138,24 @@ class _SignFormState extends State<SignForm> {
               prefixIcon: const Icon(Icons.lock_outline, color: Colors.blue),
               filled: true,
               fillColor: Colors.white,
-              contentPadding:
-                  const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
             ),
           ),
           const SizedBox(height: 10),
 
+          // REMEMBER ME
           Row(
             children: [
               Checkbox(
                 value: remember,
-                activeColor: Colors.blue,
-                onChanged: (value) {
-                  setState(() {
-                    remember = value!;
-                  });
-                },
+                onChanged: (value) => setState(() => remember = value!),
               ),
               const Text("Remember Me"),
               const Spacer(),
               GestureDetector(
-                onTap: () =>
-                    Navigator.pushNamed(context, ForgotPasswordScreen.routeName),
+                onTap: () => Navigator.pushNamed(
+                    context, ForgotPasswordScreen.routeName),
                 child: const Text(
                   "Lupa Password?",
                   style: TextStyle(color: Colors.blue),
@@ -179,9 +163,11 @@ class _SignFormState extends State<SignForm> {
               ),
             ],
           ),
+
           FormError(errors: errors),
           const SizedBox(height: 16),
 
+          // LOGIN BUTTON
           SizedBox(
             width: double.infinity,
             height: 50,
@@ -192,7 +178,7 @@ class _SignFormState extends State<SignForm> {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
                         KeyboardUtil.hideKeyboard(context);
-                        loginUser(); // 🔥 Panggil fungsi login
+                        loginUser();
                       }
                     },
               style: ElevatedButton.styleFrom(
@@ -202,13 +188,11 @@ class _SignFormState extends State<SignForm> {
               ),
               child: isLoading
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text(
-                      "Masuk",
+                  : const Text("Masuk",
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
-                          fontWeight: FontWeight.bold),
-                    ),
+                          fontWeight: FontWeight.bold)),
             ),
           ),
         ],
