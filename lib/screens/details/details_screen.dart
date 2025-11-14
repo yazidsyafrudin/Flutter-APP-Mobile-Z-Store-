@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:shop_app/screens/cart/cart_screen.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/Product_Service.dart';
 import '../../models/Product.dart';
+
 import 'components/color_dots.dart';
 import 'components/product_description.dart';
 import 'components/product_images.dart';
@@ -15,89 +16,75 @@ class DetailsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ProductDetailsArguments agrs =
+    final ProductDetailsArguments args =
         ModalRoute.of(context)!.settings.arguments as ProductDetailsArguments;
-    final product = agrs.product;
+
+    final product = args.product;
+
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
       backgroundColor: const Color(0xFFF5F6F9),
+
+      // APPBAR
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.all(8),
           child: ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
               shape: const CircleBorder(),
-              padding: EdgeInsets.zero,
-              elevation: 0,
               backgroundColor: Colors.white,
+              elevation: 0,
             ),
-            child: const Icon(
-              Icons.arrow_back_ios_new,
-              color: Color.fromARGB(255, 0, 0, 0),
-              size: 20,
-            ),
+            child: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
           ),
         ),
-        actions: [
-          Row(
-            children: [
-              Container(
-                margin: const EdgeInsets.only(right: 20),
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Row(
-                  children: [
-                    const Text(
-                      "4.7",
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    SvgPicture.asset("assets/icons/Star Icon.svg"),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
+
+      // BODY
       body: ListView(
         children: [
           ProductImages(product: product),
           TopRoundedContainer(
-            color: const Color.fromARGB(255, 255, 255, 255),
-            child: Column(
-              children: [
-                ProductDescription(
-                  product: product,
-                  pressOnSeeMore: () {},
-                ),
-              ],
-            ),
+            color: Colors.white,
+            child: ProductDescription(product: product, pressOnSeeMore: () {}),
           ),
         ],
       ),
+
+      // ADD TO CART BUTTON
       bottomNavigationBar: TopRoundedContainer(
-        color: const Color.fromARGB(255, 255, 255, 255),
+        color: Colors.white,
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.all(20),
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, CartScreen.routeName);
+              onPressed: () async {
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                int? userId = prefs.getInt("user_id");
+
+                if (userId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Anda harus login terlebih dahulu")),
+                  );
+                  return;
+                }
+
+                bool success = await ProductService.addToCart(
+                  userId,
+                  product.id,
+                  1,
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                        success ? "Berhasil ditambahkan ke keranjang" : "Gagal menambahkan ke keranjang"),
+                  ),
+                );
               },
               child: const Text("Add To Cart"),
             ),
