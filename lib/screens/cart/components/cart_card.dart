@@ -1,31 +1,26 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // tambahkan ini untuk format angka rupiah
-
-import '../../../constants.dart';
+import 'package:intl/intl.dart';
 import '../../../models/Cart.dart';
 
 class CartCard extends StatelessWidget {
-  const CartCard({
-    Key? key,
-    required this.cart,
-  }) : super(key: key);
-
   final Cart cart;
 
-  // Fungsi untuk format angka ke Rupiah
+  const CartCard({super.key, required this.cart});
+
   String formatRupiah(double amount) {
-    final formatCurrency = NumberFormat.currency(
+    final formatter = NumberFormat.currency(
       locale: 'id_ID',
       symbol: 'Rp ',
-      decimalDigits: 3,
+      decimalDigits: 0,
     );
-    return formatCurrency.format(amount);
+    return formatter.format(amount);
   }
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
+        // GAMBAR PRODUK
         SizedBox(
           width: 88,
           child: AspectRatio(
@@ -33,38 +28,43 @@ class CartCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 245, 249, 246),
+                color: const Color(0xFFF5F6F9),
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Image.asset(cart.product.images[0]),
+              child: Image.asset(
+                cart.imageUrl,      // FIX PENTING
+                fit: BoxFit.cover,
+              ),
             ),
           ),
         ),
+
         const SizedBox(width: 20),
+
+        // INFO PRODUK
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              cart.product.title,
-              style: const TextStyle(color: Colors.black, fontSize: 16),
+              cart.title,
+              style: const TextStyle(
+                color: Colors.black,
+                fontSize: 16,
+              ),
               maxLines: 2,
             ),
+
             const SizedBox(height: 8),
-            Text.rich(
-              TextSpan(
-                text: formatRupiah(cart.product.price),
-                style: const TextStyle(
-                    fontWeight: FontWeight.w600, color: kPrimaryColor),
-                children: [
-                  TextSpan(
-                    text: " x${cart.numOfItem}",
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
+
+            Text(
+              "${formatRupiah(cart.price)} x ${cart.quantity}",
+              style: const TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.blue,
               ),
-            )
+            ),
           ],
-        )
+        ),
       ],
     );
   }
