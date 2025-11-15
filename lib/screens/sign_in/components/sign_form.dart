@@ -43,7 +43,7 @@ class _SignFormState extends State<SignForm> {
     setState(() => isLoading = true);
 
     try {
-      var url = Uri.parse("http://localhost/Api_zstore/login.php");
+      var url = Uri.parse("http://10.0.2.2/Api_mobile_zstore/login.php");
 
       var response = await http.post(url, body: {
         "email": email,

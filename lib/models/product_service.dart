@@ -8,7 +8,7 @@ class ProductService {
   // Emulator Android: http://10.0.2.2/Api_zstore/
   // Real device: http://IP_WIFI/Api_zstore/
   // ================================
-  static const String baseUrl = "http://localhost/Api_zstore/";
+  static const String baseUrl = "http://10.0.2.2/Api_mobile_zstore/";
 
   // =====================================================
   // 1. AMBIL SEMUA PRODUK
@@ -174,4 +174,3 @@ class ProductService {
     }
   }
 }
-

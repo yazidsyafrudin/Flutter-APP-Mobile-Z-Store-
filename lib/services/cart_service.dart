@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/Cart.dart';
 
 class CartService {
-  static const String baseUrl = "http://localhost/Api_zstore/";
+  static const String baseUrl = "http://10.0.2.2/Api_mobile_zstore/";
 
   // ==========================================================
   // 🔹 GET CART BY USER ID

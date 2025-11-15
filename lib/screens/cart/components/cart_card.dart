@@ -19,6 +19,7 @@ class CartCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // GAMBAR PRODUK
         SizedBox(
@@ -32,7 +33,7 @@ class CartCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(15),
               ),
               child: Image.asset(
-                cart.imageUrl,      // FIX PENTING
+                cart.imageUrl,
                 fit: BoxFit.cover,
               ),
             ),
@@ -41,29 +42,32 @@ class CartCard extends StatelessWidget {
 
         const SizedBox(width: 20),
 
-        // INFO PRODUK
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              cart.title,
-              style: const TextStyle(
-                color: Colors.black,
-                fontSize: 16,
+        // INFO PRODUK — DIBUNGKUS EXPANDED BIAR TIDAK OVERFLOW
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                cart.title,
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,   // 🔥 Penting!
               ),
-              maxLines: 2,
-            ),
 
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-            Text(
-              "${formatRupiah(cart.price)} x ${cart.quantity}",
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.blue,
+              Text(
+                "${formatRupiah(cart.price)} x ${cart.quantity}",
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
