@@ -113,7 +113,10 @@ class _CartScreenState extends State<CartScreen> {
 
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: CartCard(cart: cart),
+                    child: CartCard(
+                      cart: cart,
+                      onRefresh: loadCart,
+                    ),
                   ),
                 );
               },

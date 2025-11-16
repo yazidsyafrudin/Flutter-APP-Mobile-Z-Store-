@@ -26,7 +26,7 @@ class DiscountBanner extends StatelessWidget {
         Container(
           width: double.infinity,
           margin: const EdgeInsets.symmetric(horizontal: 20),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 3),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: const LinearGradient(
@@ -63,10 +63,10 @@ class DiscountBanner extends StatelessWidget {
                     ),
                     SizedBox(height: 8),
                     Text(
-                      "Beli kaos + Sepatu Gratis 1 All Item Pembelian pertama di Aplikasi Kami!",
+                      "Get up to 40% off on your first order",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -79,7 +79,7 @@ class DiscountBanner extends StatelessWidget {
               // Bagian kanan (gambar promo)
               Image.asset(
                 'assets/images/promo_items1.png',
-                height: 130,
+                height: 110,
                 fit: BoxFit.contain,
               ),
             ],

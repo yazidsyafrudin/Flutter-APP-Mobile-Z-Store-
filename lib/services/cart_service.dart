@@ -81,4 +81,58 @@ class CartService {
 
     return data["success"] == true;
   }
+
+  // ==========================================================
+  // 🔹 CHECKOUT
+  // ==========================================================
+  static Future<bool> checkout(
+  List<Cart> items,
+  int totalPrice,
+) async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  int? userId = prefs.getInt("user_id");
+
+  if (userId == null) return false;
+
+  final url = Uri.parse("${baseUrl}checkout.php");
+
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "user_id": userId,
+      "total_price": totalPrice,
+      "items": items.map((i) => {
+        "product_id": i.productId,
+        "quantity": i.quantity,
+        "price": i.price,
+      }).toList(),
+    }),
+  );
+
+  print("CHECKOUT RESPONSE: ${response.body}");
+
+  return jsonDecode(response.body)["success"] == true;
+}
+
+// =====================================================================
+// UPDATE QTY CART
+// =====================================================================
+static Future<bool> updateQty(int cartId, int quantity) async {
+  final url = Uri.parse("${baseUrl}update_cart.php");
+
+  final response = await http.post(
+    url,
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "cart_id": cartId,
+      "quantity": quantity,
+    }),
+  );
+
+  print("UPDATE QTY RESPONSE: ${response.body}");
+
+  return jsonDecode(response.body)["success"] == true;
+}
+
 }

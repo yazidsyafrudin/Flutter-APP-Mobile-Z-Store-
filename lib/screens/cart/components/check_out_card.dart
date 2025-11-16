@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../models/Cart.dart';
+import '../../checkout/checkout_screen.dart';
 
 class CheckoutCard extends StatelessWidget {
   final List<Cart> carts;
@@ -44,6 +45,15 @@ class CheckoutCard extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () {
                   // TODO: buat checkout
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CheckoutScreen(
+                        items: carts,
+                        totalPrice: total.toInt(),
+                      ),
+                    ),
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,

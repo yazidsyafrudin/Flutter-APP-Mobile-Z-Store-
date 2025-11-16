@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shop_app/constants.dart';
 
-import 'package:shop_app/screens/favorite/favorite_screen.dart';
+import 'package:shop_app/screens/order_history/order_history_screen.dart';
 import 'package:shop_app/screens/home/home_screen.dart';
 import 'package:shop_app/screens/profile/profile_screen.dart';
 import 'package:shop_app/screens/chat/chat_screen.dart';
@@ -29,7 +29,7 @@ class _InitScreenState extends State<InitScreen> {
 
   final pages = [
     const HomeScreen(),
-    const FavoriteScreen(),
+    const OrderHistoryScreen(),
     const ChatScreen(),
     const ProfileScreen()
   ];
