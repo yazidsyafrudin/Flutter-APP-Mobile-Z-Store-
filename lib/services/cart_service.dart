@@ -135,4 +135,31 @@ static Future<bool> updateQty(int cartId, int quantity) async {
   return jsonDecode(response.body)["success"] == true;
 }
 
+// ==========================================================
+// 🔹 hitungan_keranjang
+// ==========================================================
+static Future<int> getCartCount() async {
+  final prefs = await SharedPreferences.getInstance();
+  int? userId = prefs.getInt("user_id");
+
+  if (userId == null) return 0;
+
+  try {
+    final response = await http.get(
+      Uri.parse("${baseUrl}get_cart_count.php?user_id=$userId"),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (data["success"] == true) {
+      return int.parse(data["count"].toString());
+    }
+
+    return 0;
+  } catch (e) {
+    print("ERROR CART COUNT: $e");
+    return 0;
+  }
+}
+
 }

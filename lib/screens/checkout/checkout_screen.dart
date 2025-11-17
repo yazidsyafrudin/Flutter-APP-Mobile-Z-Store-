@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/Cart.dart';
 import '../../services/cart_service.dart';
+import '../../services/notification_service.dart';
+
 
 class CheckoutScreen extends StatelessWidget {
   final List<Cart> items;
@@ -207,26 +209,36 @@ class CheckoutScreen extends StatelessWidget {
                         bool success = await CartService.checkout(items, totalPrice);
 
                         if (success) {
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: const Row(
-                                  children: [
-                                    Icon(Icons.check_circle, color: Colors.white),
-                                    SizedBox(width: 12),
-                                    Text("Checkout berhasil!"),
-                                  ],
-                                ),
-                                backgroundColor: Colors.green,
-                                behavior: SnackBarBehavior.floating,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            );
-                            Navigator.pop(context);
-                          }
-                        } else {
+  
+  // 🔔 Tambah Notifikasi
+  await NotificationService.addNotification(
+    "Pesanan Berhasil",
+    "Pesanan kamu sudah berhasil dibuat dan sedang diproses",
+  );
+
+  if (context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Row(
+          children: [
+            Icon(Icons.check_circle, color: Colors.white),
+            SizedBox(width: 12),
+            Text("Checkout berhasil!"),
+          ],
+        ),
+        backgroundColor: Colors.green,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+
+    Navigator.pop(context);
+  }
+}
+
+                        else {
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(

@@ -14,7 +14,7 @@ import 'screens/sign_in/sign_in_screen.dart';
 import 'screens/sign_up/sign_up_screen.dart';
 import 'screens/splash/splash_screen.dart';
 import 'screens/test_product_page.dart'; // ✅ tambahkan import
-
+import 'screens/notification/notification_screen.dart';
 
 // We use name route
 // All our routes will be available here
@@ -33,4 +33,6 @@ final Map<String, WidgetBuilder> routes = {
   CartScreen.routeName: (context) => const CartScreen(),
   ProfileScreen.routeName: (context) => const ProfileScreen(),
   '/test-product': (context) => const TestProductPage(), // ✅ tambahkan route baru
+  NotificationScreen.routeName: (_) => const NotificationScreen(),
+  
 };
