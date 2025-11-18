@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../services/order_service.dart';
 import '../../models/order.dart';
+import '../../services/reorder_service.dart';
+
+
 
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
@@ -214,15 +217,30 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                             Align(
                               alignment: Alignment.centerRight,
                               child: ElevatedButton(
-                                onPressed: () {
-                                  // TODO → Arahkan ke halaman produk
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content:
-                                          Text("Fitur Pesan Lagi diklik!"),
-                                    ),
-                                  );
-                                },
+                                onPressed: () async {
+  bool success = await ReorderService.reorder(order.id);
+
+  if (success) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Pesanan dimasukkan ulang ke keranjang!"),
+        ),
+      );
+
+      Navigator.pushNamed(context, "/cart");
+    }
+  } else {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Gagal memesan ulang"),
+        ),
+      );
+    }
+  }
+},
+
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2196F3),
                                   shape: RoundedRectangleBorder(

@@ -1,113 +1,102 @@
 import 'package:flutter/material.dart';
-
-import '../../../constants.dart';
+import '../../../services/otp_service.dart';
+import '../../sign_in/sign_in_screen.dart'; // <-- ROUTE SIGN IN
 
 class OtpForm extends StatefulWidget {
-  const OtpForm({
-    Key? key,
-  }) : super(key: key);
+  const OtpForm({super.key});
 
   @override
   _OtpFormState createState() => _OtpFormState();
 }
 
 class _OtpFormState extends State<OtpForm> {
-  FocusNode? pin2FocusNode;
-  FocusNode? pin3FocusNode;
-  FocusNode? pin4FocusNode;
-
-  @override
-  void initState() {
-    super.initState();
-    pin2FocusNode = FocusNode();
-    pin3FocusNode = FocusNode();
-    pin4FocusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    pin2FocusNode!.dispose();
-    pin3FocusNode!.dispose();
-    pin4FocusNode!.dispose();
-  }
-
-  void nextField(String value, FocusNode? focusNode) {
-    if (value.length == 1) {
-      focusNode!.requestFocus();
-    }
-  }
+  List<TextEditingController> controllers =
+      List.generate(6, (i) => TextEditingController());
 
   @override
   Widget build(BuildContext context) {
     return Form(
       child: Column(
         children: [
-          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+          // ============================
+          // 6 Kotak OTP
+          // ============================
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 60,
-                child: TextFormField(
-                  autofocus: true,
-                  obscureText: true,
-                  style: const TextStyle(fontSize: 24),
-                  keyboardType: TextInputType.number,
+            children: List.generate(6, (index) {
+              return SizedBox(
+                width: 50,
+                child: TextField(
+                  controller: controllers[index],
                   textAlign: TextAlign.center,
-                  decoration: otpInputDecoration,
+                  maxLength: 1,
+                  keyboardType: TextInputType.number,
+
+                  // 🔥 FIX AGAR ANGKA TERLIHAT
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+
+                  decoration: InputDecoration(
+                    counterText: "",
+                    contentPadding: const EdgeInsets.all(0),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: Colors.grey, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide:
+                          const BorderSide(color: Colors.blue, width: 2),
+                    ),
+                  ),
+
+                  // Auto-move cursor
                   onChanged: (value) {
-                    nextField(value, pin2FocusNode);
-                  },
-                ),
-              ),
-              SizedBox(
-                width: 60,
-                child: TextFormField(
-                  focusNode: pin2FocusNode,
-                  obscureText: true,
-                  style: const TextStyle(fontSize: 24),
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: otpInputDecoration,
-                  onChanged: (value) => nextField(value, pin3FocusNode),
-                ),
-              ),
-              SizedBox(
-                width: 60,
-                child: TextFormField(
-                  focusNode: pin3FocusNode,
-                  obscureText: true,
-                  style: const TextStyle(fontSize: 24),
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: otpInputDecoration,
-                  onChanged: (value) => nextField(value, pin4FocusNode),
-                ),
-              ),
-              SizedBox(
-                width: 60,
-                child: TextFormField(
-                  focusNode: pin4FocusNode,
-                  obscureText: true,
-                  style: const TextStyle(fontSize: 24),
-                  keyboardType: TextInputType.number,
-                  textAlign: TextAlign.center,
-                  decoration: otpInputDecoration,
-                  onChanged: (value) {
-                    if (value.length == 1) {
-                      pin4FocusNode!.unfocus();
-                      // Then you need to check is the code is correct or not
+                    if (value.length == 1 && index < 5) {
+                      FocusScope.of(context).nextFocus();
+                    }
+                    if (value.isEmpty && index > 0) {
+                      FocusScope.of(context).previousFocus();
                     }
                   },
                 ),
-              ),
-            ],
+              );
+            }),
           ),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+
+          const SizedBox(height: 20),
+
+          // ============================
+          // Tombol Verify OTP
+          // ============================
           ElevatedButton(
-            onPressed: () {},
-            child: const Text("Continue"),
+            child: const Text("Verify OTP"),
+            onPressed: () async {
+              String fullOtp = controllers.map((c) => c.text).join("");
+
+              bool success = await OtpService.verifyOtp(fullOtp);
+
+              if (success) {
+                if (context.mounted) {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    SignInScreen.routeName,  // 🔥 Tetap menuju halaman Login
+                    (_) => false,
+                  );
+                }
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("OTP salah atau kadaluarsa"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
           ),
         ],
       ),

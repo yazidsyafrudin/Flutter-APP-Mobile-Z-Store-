@@ -46,7 +46,7 @@ class _SignUpFormState extends State<SignUpForm> {
 
     try {
       // ⚠️ Ganti "10.0.2.2" dengan IP PC kamu kalau pakai HP fisik
-      var url = Uri.parse("http://10.02.2/Api_mobile_zstore/register.php");
+      var url = Uri.parse("http://10.0.2.2/Api_mobile_zstore/register.php");
 
       var response = await http.post(
         url,
